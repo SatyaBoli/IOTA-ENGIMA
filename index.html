@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel — Anomaly Detection</title>
+<style>
+:root{--blue:#2878e8;--blue-light:#edf5ff;--ink:#172b4d;--muted:#62748e;--line:#dce5f0;--bg:#f6f8fb;--red:#d92d20;--red-bg:#fff0ef;--green:#16845b;--green-bg:#eaf8f1;--purple:#6f42c1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.layout{min-height:100vh;display:grid;grid-template-columns:224px minmax(0,1fr)}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 10px 30px}.brand-icon{width:34px;height:34px;border-radius:10px;background:var(--blue);color:white;display:grid;place-items:center;font-size:20px;font-weight:800}.brand strong{font-size:19px;letter-spacing:-.5px}.brand small{display:block;color:var(--muted);font-size:10px}
+.nav-label{color:#8794a8;font-size:10px;font-weight:700;letter-spacing:1.2px;padding:8px 12px}.nav{display:grid;gap:4px}.nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:#526580;padding:11px 12px;border-radius:8px}.nav a.active{color:var(--blue);background:var(--blue-light);font-weight:650}.nav-icon{width:18px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;padding:14px 10px 0;color:var(--muted);font-size:11px}.online{display:flex;align-items:center;gap:8px;color:#49627d}.green-dot{height:7px;width:7px;border-radius:50%;background:#28a879}
+main{min-width:0;padding:28px clamp(18px,2.6vw,38px);max-width:1650px;width:100%;margin:auto}.header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}.header h1{font-size:27px;letter-spacing:-.8px;margin:0 0 5px}.sub{color:var(--muted);font-size:13px}.team{display:flex;align-items:center;gap:9px;color:#455b78;font-size:12px;white-space:nowrap}.avatar{width:32px;height:32px;border-radius:50%;background:#e3edf9;display:grid;place-items:center;color:#315d94;font-weight:700}
+.uploadbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:white;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}.file-button{display:inline-flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-size:12px;font-weight:600}.file-name{font-size:12px;color:var(--muted)}.file-help{flex-basis:100%;font-size:11px;color:var(--muted);padding-left:2px}.run{margin-left:auto;background:var(--blue);color:white;border:1px solid var(--blue);border-radius:7px;padding:10px 15px;font-weight:650;font-size:12px}.run:hover{background:#1767d4}.run:disabled{opacity:.65;cursor:wait}#csvFile{display:none}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.metric{background:white;border:1px solid var(--line);border-radius:9px;padding:16px}.metric-top{display:flex;justify-content:space-between;align-items:center;color:#526580;font-size:12px;gap:8px}.metric-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#edf5ff;color:var(--blue);font-size:17px}.metric-icon.red{background:var(--red-bg);color:var(--red)}.metric-icon.green{background:var(--green-bg);color:var(--green)}.metric-icon.purple{background:#f3efff;color:var(--purple)}.metric-value{font-size:25px;font-weight:750;letter-spacing:-.7px;margin:11px 0 2px}.metric-note{font-size:11px;color:var(--muted)}
+.columns{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(265px,.82fr);gap:16px;margin-bottom:16px}.stack{display:grid;gap:16px;align-content:start}.panel{background:white;border:1px solid var(--line);border-radius:9px;padding:17px;min-width:0}.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}.panel h2{font-size:14px;margin:0 0 4px;letter-spacing:-.15px}.panel-description{font-size:11px;color:var(--muted)}.select{padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:white;color:#425875;font-size:11px}
+.chart-wrap{height:255px;width:100%}canvas{width:100%;height:100%;display:block}.chart-legend{display:flex;justify-content:center;gap:18px;margin-top:7px;color:#64758e;font-size:11px}.legend-line{display:inline-block;width:19px;height:2px;background:var(--blue);vertical-align:middle;margin-right:6px}.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ed5149;vertical-align:middle;margin-right:6px}
+.model-row{padding:13px 2px;border-bottom:1px solid #edf1f6}.model-row:last-child{border-bottom:0;padding-bottom:3px}.model-line{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:650;font-size:12px}.tag{font-size:10px;font-weight:650;padding:4px 8px;border-radius:6px;background:var(--green-bg);color:var(--green)}.tag.baseline{background:#eef2f7;color:#60738e}.model-row p{font-size:11px;color:var(--muted);margin:7px 0 0}
+.insight{display:flex;gap:10px;padding:10px 0;font-size:11px}.insight:first-of-type{padding-top:2px}.insight-dot{flex:0 0 8px;height:8px;border-radius:50%;background:#ed5149;margin-top:5px}.insight-dot.green{background:#28a879}.insight strong{display:block;font-size:11px;font-weight:650;margin-bottom:3px}.insight span{color:var(--muted)}
+.tip{background:#f0f7ff;border:1px solid #cfe2ff;border-radius:9px;padding:15px;display:flex;gap:11px;color:#225caa}.tip-icon{font-size:17px}.tip strong{font-size:12px}.tip p{font-size:11px;line-height:1.6;margin:5px 0 0;color:#496b9a}
+.events{margin-bottom:16px}.event-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:13px}.event-heading h2{margin:0 0 4px}.event-actions{display:flex;align-items:center;gap:8px}.search{width:180px;max-width:45vw;padding:8px 10px;border:1px solid var(--line);border-radius:6px;outline:none;font-size:11px}.search:focus{border-color:#8ab7f9}.text-button{border:0;background:none;color:var(--blue);font-size:11px;padding:7px}.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;white-space:nowrap}thead{background:#f5f8fc}th{text-align:left;color:#526580;font-size:10px;font-weight:650;padding:10px 9px;border-bottom:1px solid var(--line)}td{font-size:11px;padding:11px 9px;border-bottom:1px solid #e9eef5;color:#354d6d}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fafcff}.status{display:inline-block;padding:4px 7px;border-radius:5px;font-size:9px;font-weight:750}.status.anomaly{color:var(--red);background:var(--red-bg)}.status.normal{color:var(--green);background:var(--green-bg)}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#8996a8;font-size:10px;padding:3px 1px 10px}.toast{position:fixed;bottom:20px;right:20px;max-width:390px;background:#17304e;color:white;padding:12px 15px;border-radius:8px;box-shadow:0 8px 28px #162b4529;display:none;font-size:12px;z-index:10}
+@media(max-width:1050px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}.stack{grid-template-columns:repeat(2,minmax(0,1fr))}.tip{align-self:start}}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{display:none}main{padding:20px 13px}.header{flex-direction:column}.header h1{font-size:23px}.team{display:none}.metrics{gap:9px}.metric{padding:12px}.metric-value{font-size:22px}.metric-top{font-size:11px}.columns{gap:12px}.stack{grid-template-columns:1fr}.panel{padding:13px}.chart-wrap{height:220px}.run{margin-left:0}.file-help{padding-left:0}.uploadbar{align-items:flex-start}.event-heading{align-items:flex-start}.event-actions{width:100%}.search{flex:1;max-width:none}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">⬡</div><div><strong>Sentinel</strong><small>Detect. Understand. Protect.</small></div></div>
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav">
+    <a class="active" href="#dashboard"><span class="nav-icon">⌂</span>Dashboard</a>
+    <a href="#upload"><span class="nav-icon">⇧</span>Upload Data</a>
+    <a href="#detections"><span class="nav-icon">▥</span>Detections</a>
+    <a href="#models"><span class="nav-icon">⚙</span>Settings</a>
+  </nav>
+  <div class="side-bottom"><div class="online"><span class="green-dot"></span><span>Dashboard available</span></div><p id="lastUpdated">Demo data · ready to connect</p></div>
+</aside>
+
+<main id="dashboard">
+  <header class="header">
+    <div><h1>Anomaly Detection Dashboard</h1><div class="sub">Monitor your time-series data and detect unusual patterns.</div></div>
+    <div class="team"><div class="avatar">TS</div><span>Team Sentinel</span><span>⌄</span></div>
+  </header>
+
+  <section class="uploadbar" id="upload">
+    <label class="file-button" for="csvFile">⇧ &nbsp;Choose CSV file</label>
+    <input id="csvFile" type="file" accept=".csv,text/csv">
+    <span class="file-name" id="fileName">No file selected</span>
+    <select class="select" id="detector" aria-label="Detection model">
+      <option value="sentinel_adaptive" selected>Sentinel Adaptive (P3)</option>
+      <option value="rolling_zscore">Rolling Z-Score</option>
+      <option value="isolation_forest">Isolation Forest</option>
+    </select>
+    <label for="zThreshold">Rolling Z threshold</label>
+    <select class="select" id="zThreshold" aria-label="Rolling Z-Score sensitivity">
+      <option value="1.5">1.5 · High</option>
+      <option value="2" selected>2.0 · Balanced</option>
+      <option value="2.5">2.5 · Low</option>
+      <option value="3">3.0 · Very low</option>
+    </select>
+    <label for="p3Sensitivity">P3 sensitivity</label>
+    <select class="select" id="p3Sensitivity" aria-label="P3 sensitivity">
+      <option value="high">High · 2.0 / 1.5</option>
+      <option value="moderate" selected>Moderate · 2.5 / 1.5</option>
+      <option value="conservative">Conservative · 3.5 / 2.0</option>
+    </select>
+    <button class="run" id="runButton">▷ &nbsp;Run Detection</button>
+    <div class="file-help">Anomaly scores differ by detector; compare labels within the selected model, not raw scores across models. Isolation Forest reports only the chronological holdout. P3 sensitivity adjusts enter/exit thresholds; these app profiles are not calibrated ground-truth settings. Upload a CSV with a numeric value column.</div>
+  </section>
+
+  <section class="metrics">
+    <article class="metric"><div class="metric-top">Input Readings <span class="metric-icon">▤</span></div><div class="metric-value" id="total">0</div><div class="metric-note" id="readingNote">Rows uploaded</div></article>
+    <article class="metric"><div class="metric-top">Anomalies Detected <span class="metric-icon red">⚠</span></div><div class="metric-value" id="anomalies" style="color:#a21e1e">0</div><div class="metric-note" id="anomalyNote">No results yet</div></article>
+    <article class="metric"><div class="metric-top">Normal Readings <span class="metric-icon green">↗</span></div><div class="metric-value" id="normal">0</div><div class="metric-note">No results yet</div></article>
+    <article class="metric"><div class="metric-top">Detection Time <span class="metric-icon purple">◷</span></div><div class="metric-value" id="duration">—</div><div class="metric-note">Time spent scoring data</div></article>
+  </section>
+
+  <section class="columns">
+    <div>
+      <article class="panel" style="margin-bottom:14px">
+        <div class="panel-heading"><div><h2>Time Series with Detected Anomalies</h2><div class="panel-description">Red points indicate observations flagged by the detector.</div></div><select class="select" aria-label="Sensor"><option>All readings</option><option>Sensor 1</option></select></div>
+        <div class="chart-wrap"><canvas id="chart"></canvas></div>
+        <div class="chart-legend"><span><i class="legend-line"></i>Value</span><span><i class="legend-dot"></i>Anomaly</span></div>
+      </article>
+      <article class="panel events" id="detections">
+        <div class="event-heading"><div><h2>Recent Anomalies</h2><div class="panel-description">Event IDs identify contiguous flagged spans; incident IDs group spans rejoined during cooldown.</div></div><div class="event-actions"><input class="search" id="search" placeholder="Search events…" aria-label="Search events"><button class="text-button" id="export">Export CSV →</button></div></div>
+        <div class="table-scroll"><table><thead><tr><th>Timestamp / Row</th><th>Sensor</th><th>Value / Baseline</th><th>Anomaly Score</th><th>Event / Incident</th><th>Reason</th><th>Status</th></tr></thead><tbody id="tableBody"></tbody></table><div id="empty" style="display:none;padding:20px;text-align:center;color:#62748e;font-size:12px">No matching rows.</div></div>
+      </article>
+    </div>
+    <div class="stack">
+      <article class="panel" id="models"><div class="panel-heading"><div><h2>Detection Models</h2><div class="panel-description">Models in the current workflow</div></div></div>
+        <div class="model-row"><div class="model-line"><span>Sentinel Adaptive (P3)</span><span class="tag" id="adaptiveTag">Selected</span></div><p id="p3Description">Robust-MAD score with warmup, hysteresis, guarded baseline updates, and drift detection.</p></div>
+        <div class="model-row"><div class="model-line"><span>Isolation Forest</span><span class="tag" id="iforestTag">Available</span></div><p>Trained on the first 70% of the series; only the final chronological 30% is scored. Its score scale differs from the other detectors.</p></div>
+        <div class="model-row"><div class="model-line"><span>Rolling Z-Score</span><span class="tag baseline" id="zTag">Selected</span></div><p id="zDescription">Flags readings more than 2 rolling standard deviations from the past 50 readings. Lower thresholds detect more.</p></div>
+      </article>
+      <article class="panel"><div class="panel-heading"><div><h2>Quick Insights</h2><div class="panel-description">A short summary of the current view</div></div></div>
+        <div id="insights">
+          <div class="insight"><i class="insight-dot green"></i><div><strong>Ready for data</strong><span>Choose a detector above and upload a CSV to analyze.</span></div></div>
+          <div class="insight"><i class="insight-dot"></i><div><strong>Results stay local</strong><span>Your CSV is processed by this local app.</span></div></div>
+        </div>
+      </article>
+      <article class="tip"><div class="tip-icon">ⓘ</div><div><strong>Fine-tune detection</strong><p>Thresholds should be calibrated on permitted validation data. Evaluate using the same split and metrics as the team evaluator.</p></div></article>
+    </div>
+  </section>
+  <footer class="footer"><span>SENTINEL · Adaptive Time-Series Anomaly Detection</span><span>Local anomaly detectors</span></footer>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+let file=null, rows=[];
+function toast(msg){const el=$("toast");el.textContent=msg;el.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>el.style.display="none",4000)}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function updateModelTags(){const model=$("detector").value;const rolling=model==="rolling_zscore";const adaptive=model==="sentinel_adaptive";$("adaptiveTag").textContent=adaptive?"Selected":"Available";$("iforestTag").textContent=model==="isolation_forest"?"Selected":"Available";$("zTag").textContent=rolling?"Selected":"Available";$("zThreshold").disabled=!rolling;$("p3Sensitivity").disabled=!adaptive}
+function render(data,elapsedMs=null,model=null,threshold=null,metadata={}){rows=data;const n=data.length,a=data.filter(r=>String(r.label).toUpperCase().includes("ANOM")).length;const inputReadings=metadata.input_readings??n;const modelName=model==="rolling_zscore"?"Rolling Z-Score (threshold "+threshold+")":model==="sentinel_adaptive"?"Sentinel Adaptive (P3 · "+(metadata.sensitivity??"moderate")+")":"Isolation Forest (holdout)";$("total").textContent=inputReadings.toLocaleString();$("readingNote").textContent=model==="isolation_forest"?n.toLocaleString()+" chronological holdout rows scored":n.toLocaleString()+" rows scored";$("anomalies").textContent=a.toLocaleString();$("normal").textContent=(n-a).toLocaleString();$("anomalyNote").textContent=n?(a/n*100).toFixed(2)+"% of scored readings":"No results yet";$("lastUpdated").textContent=n?"Results loaded · "+modelName:"Waiting for a CSV upload";$("duration").textContent=elapsedMs===null?"—":(elapsedMs/1000).toFixed(2)+"s";if(model==="sentinel_adaptive")$("p3Description").textContent="Robust-MAD score with "+metadata.enter_threshold+" enter / "+metadata.exit_threshold+" exit thresholds, warmup, guarded updates, and drift detection.";updateModelTags();drawChart(data);drawTable()}
+function drawChart(data){const c=$("chart"),r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const ctx=c.getContext("2d");ctx.scale(d,d);const w=r.width,h=r.height;ctx.clearRect(0,0,w,h);const vals=data.map(x=>Number(x.value)).filter(Number.isFinite);if(!vals.length)return;const min=Math.min(...vals),max=Math.max(...vals),span=max-min||1,L=34,R=12,T=12,B=24,pw=w-L-R,ph=h-T-B;ctx.font="10px system-ui";for(let i=0;i<5;i++){let y=T+ph*i/4;ctx.strokeStyle="#e8eef5";ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(w-R,y);ctx.stroke();ctx.fillStyle="#70829b";ctx.fillText((max-span*i/4).toFixed(0),2,y+3)}const X=i=>L+(data.length<=1?0:i/(data.length-1))*pw,Y=v=>T+(max-v)/span*ph;ctx.beginPath();data.forEach((o,i)=>{let v=Number(o.value);if(!Number.isFinite(v))return;i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v))});ctx.strokeStyle="#2878e8";ctx.lineWidth=2;ctx.stroke();data.forEach((o,i)=>{if(String(o.label).toUpperCase().includes("ANOM")&&Number.isFinite(Number(o.value))){ctx.beginPath();ctx.arc(X(i),Y(Number(o.value)),3.7,0,Math.PI*2);ctx.fillStyle="#ed5149";ctx.fill()}})}
+function drawTable(){const q=$("search").value.toLowerCase();const list=rows.map((r,i)=>({...r,_i:i})).filter(r=>[r.timestamp,r.sensor,r.value,r.score,r.label,r.event_id,r.incident_id,(r.reason_codes||[]).join(" ")].some(v=>String(v??"").toLowerCase().includes(q))).filter(r=>String(r.label).toUpperCase().includes("ANOM")).slice(-12).reverse();$("tableBody").innerHTML=list.map(r=>{const evidence=r.evidence||{};const reasons=(r.reason_codes||[]).join(", ")||"Detector threshold exceeded";const baseline=typeof r.baseline_median==="number"&&Number.isFinite(r.baseline_median)?`<small>baseline ${escapeHtml(r.baseline_median.toPrecision(5))}</small>`:"";const event=r.event_id?`${escapeHtml(r.event_id)}<small>incident ${escapeHtml(r.incident_id??"—")}</small>`:"—";const explanation=`${reasons}${evidence.residual!==undefined?`; residual ${evidence.residual}`:""}${r.baseline_update_accepted===false?"; baseline update rejected":""}`;return `<tr><td>${escapeHtml(r.timestamp??`Row ${r._i+1}`)}</td><td>${escapeHtml(r.sensor??"—")}</td><td>${escapeHtml(r.value)}${baseline}</td><td title="Robust score: ${escapeHtml(r.raw_score??r.score)}">${Number.isFinite(Number(r.score))?Number(r.score).toFixed(2):"—"}</td><td>${event}</td><td title="${escapeHtml(explanation)}">${escapeHtml(reasons)}</td><td><span class="status anomaly">ANOMALOUS</span></td></tr>`}).join("");$("empty").style.display=list.length?"none":"block"}
+$("search").addEventListener("input",drawTable);
+$("detector").addEventListener("change",updateModelTags);
+$("p3Sensitivity").addEventListener("change",()=>{if($("detector").value==="sentinel_adaptive")$("p3Description").textContent="P3 sensitivity: "+$("p3Sensitivity").selectedOptions[0].textContent+" enter / exit thresholds."});
+$("zThreshold").addEventListener("change",()=>{$("zDescription").textContent="Flags readings more than "+$("zThreshold").value+" rolling standard deviations from the past 50 readings. Lower thresholds detect more."});
+$("csvFile").addEventListener("change",e=>{file=e.target.files[0]||null;$("fileName").textContent=file?file.name:"No file selected";});
+$("runButton").addEventListener("click",async()=>{if(!file){toast("Choose a CSV file first.");return}const b=$("runButton");b.disabled=true;b.textContent="Running…";try{const res=await fetch("/api/detect",{method:"POST",headers:{"Content-Type":"text/csv","X-Detector-Model":$("detector").value,"X-Z-Threshold":$("zThreshold").value,"X-P3-Sensitivity":$("p3Sensitivity").value},body:await file.text()});const json=await res.json();if(!res.ok)throw new Error(json.error||"API returned "+res.status);if(!Array.isArray(json.results))throw new Error("The detector returned an invalid response.");render(json.results,json.elapsed_ms,json.model,json.threshold,json);toast("Detection complete.");}catch(err){toast("Detection failed: "+err.message);}finally{b.disabled=false;b.textContent="▷  Run Detection"}});
+$("export").addEventListener("click",()=>{if(!rows.length)return;const cols=["timestamp","sensor","value","score","label","event_id","incident_id","baseline_median","residual","raw_score","reason_codes"];const csv=[cols.join(","),...rows.map(r=>cols.map(k=>`"${String(Array.isArray(r[k])?r[k].join("|"):(r[k]??"")).replace(/"/g,'""')}"`).join(","))].join("\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));const a=document.createElement("a");a.href=url;a.download="sentinel-results.csv";a.click();URL.revokeObjectURL(url);});
+window.addEventListener("resize",()=>drawChart(rows));render([]);</script>
+</body>
+</html>
