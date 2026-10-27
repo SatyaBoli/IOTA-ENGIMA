@@ -155,6 +155,60 @@ def test_p3_adaptation_contract_and_event_detection():
     assert result["exit_threshold"] == 1.5
 
 
+def test_neww_hybrid_loads_trained_checkpoint_and_returns_component_evidence():
+    csv_lines = ["timestamp,sensor,value"]
+    csv_lines.extend(
+        f"{index},sensor-1,{10 + (index % 3) * 0.1}"
+        for index in range(80)
+    )
+    result = analyze_csv("\n".join(csv_lines), "neww_ensemble")
+
+    assert result["backend"] == "NEWW"
+    assert result["runtime"]["checkpoint_loaded"] is True
+    assert result["runtime"]["checkpoint_sha256"] == (
+        "6bd10611237536852794d46c70c02bd341891053273d5184a6e36001f1d31717"
+    )
+    assert result["runtime"]["device"] in {"cpu", "cuda:0"}
+    assert result["input_readings"] == result["scored_readings"] == 80
+    assert len(result["predictions"]) == 80
+    assert result["runtime"]["detector_version"] == "ensemble-0.2.0"
+    for row in result["results"]:
+        assert row["label"] in {"NORMAL", "ANOMALOUS"}
+        assert np.isfinite(row["score"])
+        context = row["evidence"]["context"]
+        assert context["checkpoint_loaded"] is True
+        assert {"mad_score", "ewma_score", "tcn_score"} <= context.keys()
+        assert np.isfinite(context["tcn_score"])
+
+
+def test_neww_hybrid_predictions_are_causal():
+    prefix = ["timestamp,value"]
+    prefix.extend(f"{index},{10 + index % 2}" for index in range(70))
+    original = prefix + [f"{index},{10 + index % 2}" for index in range(70, 90)]
+    changed = prefix + [f"{index},1000" for index in range(70, 90)]
+
+    before = analyze_csv("\n".join(original), "neww_ensemble")
+    after = analyze_csv("\n".join(changed), "neww_ensemble")
+
+    for earlier, later in zip(before["results"][:70], after["results"][:70]):
+        assert earlier["score"] == later["score"]
+        assert earlier["label"] == later["label"]
+        assert earlier["baseline_median"] == later["baseline_median"]
+
+
+def test_neww_hybrid_flags_a_sustained_outlier_burst():
+    values = [10 + ((index % 5) - 2) * 0.05 for index in range(240)]
+    values.extend([100.0] * 10)
+    values.extend(10 + ((index % 5) - 2) * 0.05 for index in range(100))
+    csv_lines = ["timestamp,value"]
+    csv_lines.extend(f"{index},{value}" for index, value in enumerate(values))
+
+    result = analyze_csv("\n".join(csv_lines), "neww_ensemble")
+    burst = result["results"][240:250]
+
+    assert sum(row["label"] == "ANOMALOUS" for row in burst) >= 5
+
+
 def test_app_isolation_forest_scores_only_chronological_holdout():
     csv_lines = ["timestamp,value"]
     csv_lines.extend(
@@ -182,4 +236,7 @@ if __name__ == "__main__":
     test_iforest_output_contract_and_causal_features()
     test_iforest_holdout_changes_cannot_change_earlier_holdout_scores()
     test_p3_adaptation_contract_and_event_detection()
+    test_neww_hybrid_loads_trained_checkpoint_and_returns_component_evidence()
+    test_neww_hybrid_predictions_are_causal()
+    test_neww_hybrid_flags_a_sustained_outlier_burst()
     print("All tests passed")

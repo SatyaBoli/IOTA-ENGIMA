@@ -17,11 +17,16 @@ from p3.sentinel.adaptation import AdaptationLayer
 from p3.sentinel.config import AdaptationConfig
 from p3.sentinel.contracts import Point
 from p3_detector import CausalMadDetector
+from neww.sentinel.config import SentinelConfig
+from neww.sentinel.contracts import Point as NewwPoint
+from neww.sentinel.detectors.ensemble import HybridEnsembleDetector
+from neww.sentinel.pipeline import SentinelPipeline
 
 
 MAX_REQUEST_BYTES = 10 * 1024 * 1024
 INDEX_FILE = Path(__file__).with_name("index.html")
 ADAPTATION_CONFIG = Path(__file__).with_name("p3") / "configs" / "baseline.yaml"
+NEWW_CONFIG = Path(__file__).with_name("neww") / "candidate.yaml"
 P3_SENSITIVITY = {
     "moderate": (2.5, 1.5),
     "high": (2.0, 1.5),
@@ -31,7 +36,7 @@ P3_SENSITIVITY = {
 
 def analyze_csv(
     contents,
-    model_name="sentinel_adaptive",
+    model_name="neww_ensemble",
     threshold=2.0,
     p3_sensitivity="moderate",
 ):
@@ -78,7 +83,84 @@ def analyze_csv(
 
     started = time.perf_counter()
     p3_predictions = None
-    if model_name == "sentinel_adaptive":
+    neww_detectors = {
+        "neww_ensemble": "ensemble",
+        "neww_mad": "rolling_mad",
+        "neww_ewma": "ewma",
+        "neww_iforest": "iforest",
+    }
+    if model_name in neww_detectors:
+        config = SentinelConfig.from_yaml(str(NEWW_CONFIG))
+        config = replace(
+            config,
+            detector=replace(
+                config.detector,
+                detector_type=neww_detectors[model_name],
+            ),
+        )
+        pipeline = SentinelPipeline(config)
+        if model_name == "neww_ensemble" and (
+            not isinstance(pipeline.detector, HybridEnsembleDetector)
+            or not pipeline.detector.checkpoint_loaded
+        ):
+            raise RuntimeError("The NEWW trained TCN checkpoint did not load.")
+
+        points = [
+            NewwPoint(
+                series_id=record["sensor"] if record["sensor"] != "—" else "series-1",
+                timestamp=record["timestamp"],
+                value=record["value"],
+            )
+            for record in records
+        ]
+        predictions, pipeline_stats = pipeline.process_stream(points)
+        for record, prediction in zip(records, predictions):
+            evidence = prediction["evidence"]
+            record["score"] = prediction["anomaly_score"]
+            record["label"] = prediction["label"]
+            record["series_id"] = prediction["series_id"]
+            record["threshold"] = prediction["threshold"]
+            record["event_id"] = prediction["event_id"]
+            record["reason_codes"] = prediction["reason_codes"]
+            record["detector_version"] = prediction["detector_version"]
+            record["evidence"] = evidence
+            record["baseline_median"] = evidence["baseline"]
+            record["residual"] = evidence["residual"]
+            record["raw_score"] = evidence["raw_score"]
+            record["is_warmup"] = evidence["context"].get("is_warmup", False)
+
+        detector = pipeline.detector
+        checkpoint_loaded = None
+        device = "cpu"
+        if isinstance(detector, HybridEnsembleDetector):
+            checkpoint_loaded = detector.checkpoint_loaded
+            device = str(detector.tcn_detector.device)
+        elif model_name == "neww_ensemble":
+            raise RuntimeError("The NEWW hybrid detector was not constructed.")
+        runtime = {
+            "backend": "NEWW",
+            "detector_version": detector.version,
+            "device": device,
+            "checkpoint_loaded": checkpoint_loaded,
+            "checkpoint_sha256": (
+                detector.checkpoint_sha256
+                if isinstance(detector, HybridEnsembleDetector)
+                else None
+            ),
+        }
+        return {
+            "results": records,
+            "predictions": predictions,
+            "model": model_name,
+            "backend": "NEWW",
+            "runtime": runtime,
+            "pipeline_stats": pipeline_stats,
+            "threshold": None,
+            "input_readings": len(records),
+            "scored_readings": len(records),
+            "elapsed_ms": round((time.perf_counter() - started) * 1000, 2),
+        }
+    elif model_name == "sentinel_adaptive":
         if p3_sensitivity not in P3_SENSITIVITY:
             raise ValueError("Choose a valid P3 sensitivity profile.")
         enter_threshold, exit_threshold = P3_SENSITIVITY[p3_sensitivity]
@@ -224,7 +306,7 @@ class SentinelHandler(BaseHTTPRequestHandler):
 
         try:
             contents = self.rfile.read(length).decode("utf-8-sig")
-            model_name = self.headers.get("X-Detector-Model", "sentinel_adaptive")
+            model_name = self.headers.get("X-Detector-Model", "neww_ensemble")
             try:
                 threshold = float(self.headers.get("X-Z-Threshold", "2.0"))
             except ValueError as exc:
@@ -233,6 +315,18 @@ class SentinelHandler(BaseHTTPRequestHandler):
             result = analyze_csv(contents, model_name, threshold, sensitivity)
         except (UnicodeDecodeError, csv.Error, ValueError) as exc:
             self._send_json(400, {"error": str(exc)})
+            return
+        except (FileNotFoundError, ModuleNotFoundError, RuntimeError) as exc:
+            self._send_json(
+                503,
+                {
+                    "error": (
+                        f"The selected detector could not start: {exc}. "
+                        "Install app dependencies with "
+                        "'python -m pip install -r requirements.txt'."
+                    )
+                },
+            )
             return
         self._send_json(200, result)
 
