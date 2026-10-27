@@ -186,15 +186,64 @@ h1 { margin-bottom: 5px; font-size: clamp(24px, 2vw, 30px); font-weight: 720; le
 .metric-green { --metric-glow: #eaf7f0; --metric-color: #18845d; }
 .metric-violet { --metric-glow: #f2efff; --metric-color: #7058c7; }
 .analysis-grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(245px, .78fr); gap: 15px; }
-.chart-card { padding: 18px 18px 12px; }
-.chart-heading { align-items: center; }
-.chart-wrap { position: relative; height: 290px; margin-top: 12px; }
+.chart-card {
+  overflow: hidden;
+  padding: 19px 19px 13px;
+  border-color: #1c2a40;
+  background: linear-gradient(145deg, #111c2c, #0d1726 72%);
+  box-shadow: 0 16px 38px rgb(15 29 49 / 14%);
+}
+.chart-heading { align-items: flex-start; }
+.chart-heading h2 { margin: 0; color: #f0f5ff; }
+.chart-heading p { color: #91a1b9; }
+.chart-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.chart-live-dot { position: relative; width: 7px; height: 7px; border-radius: 50%; background: #45dfcf; box-shadow: 0 0 10px rgb(69 223 207 / 75%); }
+.chart-live-dot::after { position: absolute; inset: -4px; border: 1px solid rgb(69 223 207 / 50%); border-radius: 50%; content: ""; animation: chart-pulse 1.8s ease-out infinite; }
+@keyframes chart-pulse { to { transform: scale(1.8); opacity: 0; } }
+.chart-wrap {
+  position: relative;
+  height: 310px;
+  margin-top: 15px;
+  overflow: hidden;
+  border: 1px solid rgb(139 168 208 / 10%);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 68% 12%, rgb(33 82 128 / 16%), transparent 48%),
+    linear-gradient(180deg, #111e30, #0e1929);
+}
 #chart { display: block; width: 100%; height: 100%; }
-.chart-tooltip { position: absolute; z-index: 2; display: none; min-width: 145px; padding: 8px 10px; border: 1px solid #dce4ee; border-radius: 7px; background: #fff; box-shadow: 0 6px 20px rgb(19 34 54 / 12%); color: #35465d; font-size: 10px; pointer-events: none; }
-.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 3px 0 1px; color: #758196; font-size: 9px; }
+.chart-tooltip { position: absolute; z-index: 2; display: none; min-width: 145px; padding: 8px 10px; border: 1px solid #34445c; border-radius: 7px; background: #18263a; box-shadow: 0 8px 24px rgb(0 0 0 / 28%); color: #e7eefb; font-size: 10px; pointer-events: none; }
+.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 9px 0 2px; color: #a4b2c7; font-size: 9px; }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .legend-mark { width: 15px; height: 2px; border-radius: 2px; background: var(--mark-color); }
 .legend-mark.dot { width: 7px; height: 7px; border-radius: 50%; }
+.chart-playback { display: flex; align-items: center; gap: 10px; margin: 11px 1px 0; color: #91a1b9; font-size: 9px; }
+.chart-play {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgb(136 166 208 / 20%);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 4%);
+  color: #dce8fa;
+  font-size: 9px;
+  font-weight: 650;
+  transition: background .15s ease, border-color .15s ease;
+}
+.chart-play:hover:not(:disabled) { border-color: rgb(89 178 255 / 55%); background: rgb(83 160 235 / 12%); }
+.chart-play:disabled { opacity: .42; cursor: not-allowed; }
+.chart-play svg { width: 12px; height: 12px; }
+.chart-card .model-pill { border-color: rgb(136 166 208 / 18%); background: rgb(255 255 255 / 5%); color: #b7c7dd; }
+.chart-card .chart-modes { border-color: rgb(136 166 208 / 16%); background: rgb(255 255 255 / 4%); }
+.chart-card .chart-mode { color: #91a1b9; }
+.chart-card .chart-mode.active { background: #243650; color: #edf5ff; box-shadow: 0 1px 5px rgb(0 0 0 / 22%); }
+.chart-progress-copy { flex: 0 0 auto; min-width: 88px; font-variant-numeric: tabular-nums; }
+.chart-progress-track { height: 3px; flex: 1; overflow: hidden; border-radius: 99px; background: rgb(144 164 192 / 18%); }
+.chart-progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #38d7d0, #57a9ff); box-shadow: 0 0 11px rgb(56 215 208 / 45%); }
 .overview-stack { display: grid; align-content: start; gap: 13px; }
 .summary-card, .model-card, .how-card { padding: 16px; }
 .summary-card h2, .model-card h2, .how-card h2 { margin: 0 0 11px; font-size: 12px; font-weight: 710; letter-spacing: -.15px; }
@@ -337,7 +386,7 @@ tbody tr:last-child td { border-bottom: 0; }
   .metric-note { font-size: 8px; }
   .overview-stack { grid-template-columns: minmax(0, 1fr); }
   .chart-card { padding: 14px 12px 10px; }
-  .chart-wrap { height: 235px; }
+  .chart-wrap { height: 250px; }
   .results-header { flex-direction: column; padding: 14px 13px 11px; }
   .result-actions { width: 100%; }
   .search-input { width: auto; flex: 1; }
@@ -345,11 +394,14 @@ tbody tr:last-child td { border-bottom: 0; }
   .footer { flex-direction: column; gap: 3px; }
   .detail-grid { grid-template-columns: minmax(0, 1fr); }
   .chart-modes { flex: 0 0 auto; }
+  .chart-progress-copy { min-width: 72px; }
+  .chart-legend { gap: 10px; }
   .benchmark-card, .architecture-card { padding: 14px; }
   .pipeline { grid-template-columns: minmax(0,1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+  .chart-live-dot::after { animation: none; }
 }
 </style>
 </head>
@@ -482,8 +534,12 @@ tbody tr:last-child td { border-bottom: 0; }
         <section class="analysis-grid" aria-label="Analysis visualization and details">
           <article class="card chart-card">
             <div class="section-heading chart-heading">
-              <div><h2>Stream replay</h2><p id="chartSubtitle">Upload data to see readings and flagged points over time.</p></div>
+              <div><div class="chart-title-row"><span class="chart-live-dot" aria-hidden="true"></span><h2>Stream replay</h2></div><p id="chartSubtitle">Upload data to see readings and flagged points over time.</p></div>
               <div class="chart-tools">
+                <button class="chart-play" id="chartPlayButton" type="button" disabled aria-label="Replay the analyzed stream">
+                  <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.5v9l7-4.5-7-4.5Z"/></svg>
+                  <span>Replay</span>
+                </button>
                 <div class="chart-modes" role="group" aria-label="Chart signal">
                   <button class="chart-mode active" type="button" data-chart-mode="signal" aria-pressed="true">Value</button>
                   <button class="chart-mode" type="button" data-chart-mode="score" aria-pressed="false">Score &amp; threshold</button>
@@ -495,10 +551,17 @@ tbody tr:last-child td { border-bottom: 0; }
               <canvas id="chart" role="img" aria-label="Time-series chart; anomalous points are marked in red"></canvas>
               <div class="chart-tooltip" id="chartTooltip"></div>
             </div>
+            <div class="chart-playback" aria-label="Stream replay progress">
+              <span class="chart-progress-copy" id="chartProgressCopy">Waiting for stream</span>
+              <div class="chart-progress-track" id="chartProgressTrack" role="progressbar" aria-label="Replay progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="chart-progress-fill" id="chartProgressFill"></div>
+              </div>
+              <span id="chartAnomalyCount">0 alerts</span>
+            </div>
             <div class="chart-legend" id="chartLegend">
-              <span class="legend-item" id="observedLegend"><i class="legend-mark" style="--mark-color:#3478f6"></i>Observed</span>
+              <span class="legend-item" id="observedLegend"><i class="legend-mark" style="--mark-color:#3ce0d2"></i>Observed</span>
               <span class="legend-item" id="baselineLegend" style="display:none"><i class="legend-mark" style="--mark-color:#9c7add"></i>Recent baseline</span>
-              <span class="legend-item" id="scoreLegend" style="display:none"><i class="legend-mark" style="--mark-color:#3478f6"></i>Anomaly score</span>
+              <span class="legend-item" id="scoreLegend" style="display:none"><i class="legend-mark" style="--mark-color:#3ce0d2"></i>Anomaly score</span>
               <span class="legend-item" id="thresholdLegend" style="display:none"><i class="legend-mark" style="--mark-color:#e7a33d"></i>Applied threshold</span>
               <span class="legend-item"><i class="legend-mark dot" style="--mark-color:#d94b4b"></i>Anomalous</span>
             </div>
@@ -610,7 +673,11 @@ tbody tr:last-child td { border-bottom: 0; }
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { file: null, rows: [], filter: "anomalies", model: "neww_ensemble", chartMode: "signal", threshold: null, chartGeometry: null };
+const state = {
+  file: null, rows: [], filter: "anomalies", model: "neww_ensemble", chartMode: "signal",
+  threshold: null, chartGeometry: null, chartIndices: [], chartAnomalyPrefix: [],
+  chartPlayback: { progress: 1, playing: false, frameId: null, lastTime: null }
+};
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -693,7 +760,11 @@ function updateP3Config() {
 }
 
 function resetResults() {
+  if (state.chartPlayback.frameId !== null) cancelAnimationFrame(state.chartPlayback.frameId);
+  state.chartPlayback = { progress: 1, playing: false, frameId: null, lastTime: null };
   state.rows = [];
+  state.chartIndices = [];
+  state.chartAnomalyPrefix = [];
   state.threshold = null;
   $("total").textContent = "—";
   $("anomalies").textContent = "—";
@@ -709,6 +780,12 @@ function resetResults() {
   $("chartSubtitle").textContent = "Upload data to see readings and flagged points over time.";
   $("resultsSubtitle").textContent = "Run an analysis to review the results.";
   $("modelPill").textContent = "No analysis yet";
+  $("chartPlayButton").disabled = true;
+  $("chartProgressCopy").textContent = "Waiting for stream";
+  $("chartProgressFill").style.width = "0%";
+  $("chartProgressTrack").setAttribute("aria-valuenow", "0");
+  $("chartAnomalyCount").textContent = "0 alerts";
+  updateChartPlayButton();
   $("baselineLegend").style.display = "none";
   $("observedLegend").style.display = state.chartMode === "signal" ? "inline-flex" : "none";
   $("scoreLegend").style.display = state.chartMode === "score" ? "inline-flex" : "none";
@@ -726,7 +803,23 @@ function resetResults() {
 }
 
 function showResults(payload) {
+  if (state.chartPlayback.frameId !== null) cancelAnimationFrame(state.chartPlayback.frameId);
   state.rows = payload.results;
+  const stride = Math.max(1, Math.ceil(state.rows.length / 2200));
+  state.chartIndices = [];
+  for (let index = 0; index < state.rows.length; index += stride) state.chartIndices.push(index);
+  state.rows.forEach((row, index) => {
+    if (String(row.label).toUpperCase() === "ANOMALOUS" && index % stride !== 0) state.chartIndices.push(index);
+  });
+  state.chartIndices.sort((a, b) => a - b);
+  state.chartAnomalyPrefix = new Array(state.rows.length + 1);
+  state.chartAnomalyPrefix[0] = 0;
+  state.rows.forEach((row, index) => {
+    state.chartAnomalyPrefix[index + 1] = state.chartAnomalyPrefix[index] +
+      (String(row.label).toUpperCase() === "ANOMALOUS" ? 1 : 0);
+  });
+  state.chartPlayback = { progress: 0, playing: false, frameId: null, lastTime: null };
+  $("chartPlayButton").disabled = !state.rows.length;
   state.model = payload.model;
   state.threshold = payload.threshold ?? null;
   const total = payload.input_readings ?? payload.results.length;
@@ -784,6 +877,7 @@ function showResults(payload) {
   $("benchmarkGate").textContent = "This CSV contains no verified ground-truth event windows, so event F1, precision, and recall are intentionally unavailable. Throughput and mean request time are end-to-end local measurements, not detector-only benchmark claims.";
   renderTable();
   drawChart(payload.results);
+  startChartReplay();
 }
 
 function formatNumber(value, digits = 4) {
@@ -891,8 +985,12 @@ function drawChart(data) {
   const rect = canvas.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
   const ratio = window.devicePixelRatio || 1;
-  canvas.width = Math.round(rect.width * ratio);
-  canvas.height = Math.round(rect.height * ratio);
+  const pixelWidth = Math.round(rect.width * ratio);
+  const pixelHeight = Math.round(rect.height * ratio);
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
+  }
   const ctx = canvas.getContext("2d");
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   const width = rect.width;
@@ -900,10 +998,10 @@ function drawChart(data) {
   ctx.clearRect(0, 0, width, height);
   state.chartGeometry = null;
   if (!data.length) {
-    ctx.fillStyle = "#8793a3";
+    ctx.fillStyle = "#9cacc2";
     ctx.font = "12px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("Your time-series chart will appear here", width / 2, height / 2);
+    ctx.fillText("Upload a stream to replay its signal", width / 2, height / 2);
     return;
   }
   const scoring = state.chartMode === "score";
@@ -919,113 +1017,215 @@ function drawChart(data) {
     if (!Number.isFinite(value)) continue;
     low = Math.min(low, value);
     high = Math.max(high, value);
-    if (scoring) {
-      const threshold = thresholdFor(row);
-      if (Number.isFinite(threshold)) {
-        low = Math.min(low, threshold);
-        high = Math.max(high, threshold);
-      }
+    const reference = scoring ? thresholdFor(row) : Number(row.baseline_median);
+    if (Number.isFinite(reference)) {
+      low = Math.min(low, reference);
+      high = Math.max(high, reference);
     }
   }
   if (!Number.isFinite(low) || !Number.isFinite(high)) return;
   const span = high - low || Math.max(Math.abs(high) * .1, 1);
-  low -= span * .08;
-  high += span * .08;
-  const pad = { left: 49, right: 14, top: 18, bottom: 31 };
+  low -= span * .12;
+  high += span * .12;
+  const pad = { left: 58, right: 18, top: 21, bottom: 34 };
   const plotWidth = Math.max(1, width - pad.left - pad.right);
   const plotHeight = Math.max(1, height - pad.top - pad.bottom);
-  state.chartGeometry = { left: pad.left, top: pad.top, plotWidth, plotHeight, low, high, length: data.length, scoring };
+  const lastVisibleIndex = Math.max(0, Math.min(data.length - 1, Math.floor((data.length - 1) * state.chartPlayback.progress)));
+  const visibleCount = lastVisibleIndex + 1;
+  state.chartGeometry = {
+    left: pad.left, top: pad.top, plotWidth, plotHeight, low, high,
+    length: data.length, scoring, visibleCount
+  };
   const x = index => pad.left + (data.length <= 1 ? .5 : index / (data.length - 1)) * plotWidth;
   const y = value => pad.top + (high - value) / (high - low) * plotHeight;
+  const indexes = state.chartIndices.length ? state.chartIndices : data.map((_, index) => index);
+  const visibleIndexes = indexes.filter(index => index <= lastVisibleIndex);
+  if (visibleIndexes[visibleIndexes.length - 1] !== lastVisibleIndex) visibleIndexes.push(lastVisibleIndex);
   ctx.font = "9px system-ui";
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   for (let tick = 0; tick <= 4; tick++) {
     const value = high - (high - low) * tick / 4;
     const yPos = pad.top + plotHeight * tick / 4;
-    ctx.strokeStyle = "#edf0f4";
+    ctx.strokeStyle = "rgb(153 174 205 / 11%)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(pad.left, yPos);
     ctx.lineTo(width - pad.right, yPos);
     ctx.stroke();
-    ctx.fillStyle = "#8793a2";
-    ctx.fillText(Number(value.toPrecision(4)).toString(), pad.left - 9, yPos);
+    ctx.fillStyle = "#8b9bb3";
+    ctx.fillText(Number(value.toPrecision(4)).toString(), pad.left - 10, yPos);
   }
-  if (scoring) {
-    const thresholds = data.map((row, index) => ({ index, value: thresholdFor(row) }));
-    if (thresholds.some(point => Number.isFinite(point.value))) {
-      ctx.beginPath();
-      let started = false;
-      thresholds.forEach(point => {
-        if (!Number.isFinite(point.value)) { started = false; return; }
-        if (!started) { ctx.moveTo(x(point.index), y(point.value)); started = true; }
-        else ctx.lineTo(x(point.index), y(point.value));
-      });
-      ctx.strokeStyle = "#e7a33d";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([5, 4]);
-      ctx.stroke();
-      ctx.setLineDash([]);
+  const drawSeries = (getValue, color, lineWidth, dashed = false) => {
+    ctx.beginPath();
+    let started = false;
+    for (const index of visibleIndexes) {
+      const value = getValue(data[index]);
+      if (!Number.isFinite(value)) { started = false; continue; }
+      if (!started) { ctx.moveTo(x(index), y(value)); started = true; }
+      else ctx.lineTo(x(index), y(value));
     }
-  } else {
-    const baselinePoints = data.map((row, index) => ({ index, value: Number(row.baseline_median) }))
-      .filter(point => Number.isFinite(point.value));
-    if (baselinePoints.length > 1) {
-      ctx.beginPath();
-      baselinePoints.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(x(point.index), y(point.value));
-        else ctx.lineTo(x(point.index), y(point.value));
-      });
-      ctx.strokeStyle = "#9c7add";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([5, 4]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-  }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    if (dashed) ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    if (dashed) ctx.setLineDash([]);
+  };
+  drawSeries(scoring ? thresholdFor : row => Number(row.baseline_median), scoring ? "#f5b858" : "#b39aff", 1.6, true);
+
   ctx.beginPath();
   let started = false;
-  data.forEach((row, index) => {
-    const value = valueFor(row);
-    if (!Number.isFinite(value)) { started = false; return; }
+  for (const index of visibleIndexes) {
+    const value = valueFor(data[index]);
+    if (!Number.isFinite(value)) { started = false; continue; }
     if (!started) { ctx.moveTo(x(index), y(value)); started = true; }
     else ctx.lineTo(x(index), y(value));
-  });
-  ctx.strokeStyle = "#3478f6";
-  ctx.lineWidth = 1.8;
-  ctx.lineJoin = "round";
-  ctx.stroke();
-  const stride = Math.max(1, Math.ceil(data.length / 1600));
-  data.forEach((row, index) => {
+  }
+  ctx.lineTo(x(lastVisibleIndex), pad.top + plotHeight);
+  ctx.lineTo(x(0), pad.top + plotHeight);
+  ctx.closePath();
+  const fill = ctx.createLinearGradient(0, pad.top, 0, pad.top + plotHeight);
+  fill.addColorStop(0, "rgb(42 204 205 / 25%)");
+  fill.addColorStop(1, "rgb(42 204 205 / 0%)");
+  ctx.fillStyle = fill;
+  ctx.fill();
+  drawSeries(valueFor, "#3ce0d2", 2.4);
+
+  for (const index of visibleIndexes) {
+    const row = data[index];
+    if (String(row.label).toUpperCase() !== "ANOMALOUS") continue;
     const value = valueFor(row);
-    if (!Number.isFinite(value)) return;
+    if (!Number.isFinite(value)) continue;
     const pointX = x(index);
     const pointY = y(value);
-    const isAnomaly = String(row.label).toUpperCase() === "ANOMALOUS";
-    if (!isAnomaly && index % stride !== 0 && index !== data.length - 1) return;
     ctx.beginPath();
-    ctx.arc(pointX, pointY, isAnomaly ? 3.6 : 1.35, 0, Math.PI * 2);
-    ctx.fillStyle = isAnomaly ? "#d94b4b" : "#5c91f4";
-    ctx.globalAlpha = isAnomaly ? 1 : .42;
+    ctx.moveTo(pointX, pad.top);
+    ctx.lineTo(pointX, pad.top + plotHeight);
+    ctx.strokeStyle = "rgb(255 104 115 / 20%)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.save();
+    ctx.shadowColor = "#ff586b";
+    ctx.shadowBlur = 17;
+    ctx.beginPath();
+    ctx.arc(pointX, pointY, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff6673";
     ctx.fill();
-    ctx.globalAlpha = 1;
-    if (isAnomaly) {
-      ctx.beginPath();
-      ctx.arc(pointX, pointY, 6, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgb(217 75 75 / 22%)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-  });
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(pointX, pointY, 7.5, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgb(255 102 115 / 55%)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(pointX, pointY, 1.6, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff4f4";
+    ctx.fill();
+  }
+  const headValue = valueFor(data[lastVisibleIndex]);
+  if (Number.isFinite(headValue)) {
+    const headX = x(lastVisibleIndex);
+    const headY = y(headValue);
+    const pulse = .5 + .5 * Math.sin(performance.now() / 180);
+    ctx.beginPath();
+    ctx.moveTo(headX, pad.top);
+    ctx.lineTo(headX, pad.top + plotHeight);
+    ctx.strokeStyle = "rgb(93 205 255 / 27%)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(headX, headY, 5 + pulse * 3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(74 226 218 / ${.12 + pulse * .12})`;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(headX, headY, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = "#edffff";
+    ctx.shadowColor = "#3ce0d2";
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#8793a2";
+  ctx.fillStyle = "#8799b2";
   const firstTime = data[0].timestamp ?? "1";
-  const lastTime = data[data.length - 1].timestamp ?? String(data.length);
-  ctx.fillText(String(firstTime), pad.left, height - 8, plotWidth * .44);
+  const lastTime = data[lastVisibleIndex].timestamp ?? String(lastVisibleIndex + 1);
+  ctx.fillText(String(firstTime), pad.left, height - 9, plotWidth * .44);
   ctx.textAlign = "right";
-  ctx.fillText(String(lastTime), width - pad.right, height - 8, plotWidth * .44);
+  ctx.fillText(String(lastTime), x(lastVisibleIndex), height - 9, plotWidth * .44);
+  updateChartPlaybackUI(visibleCount);
+}
+
+function updateChartPlaybackUI(visibleCount) {
+  const total = state.rows.length;
+  const visible = Math.min(visibleCount, total);
+  const percent = total ? Math.round(visible / total * 100) : 0;
+  const alerts = state.chartAnomalyPrefix[visible] ?? 0;
+  $("chartProgressCopy").textContent = total
+    ? `${visible.toLocaleString()} / ${total.toLocaleString()} points`
+    : "Waiting for stream";
+  $("chartAnomalyCount").textContent = `${alerts.toLocaleString()} ${alerts === 1 ? "alert" : "alerts"}`;
+  $("chartProgressFill").style.width = `${percent}%`;
+  $("chartProgressTrack").setAttribute("aria-valuenow", String(percent));
+  updateChartPlayButton();
+}
+
+function updateChartPlayButton() {
+  const button = $("chartPlayButton");
+  const playing = state.chartPlayback.playing;
+  button.innerHTML = playing
+    ? `<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 3.5h3v9H4zm5 0h3v9H9z"/></svg><span>Pause</span>`
+    : `<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.5v9l7-4.5-7-4.5Z"/></svg><span>Replay</span>`;
+  button.setAttribute("aria-label", playing ? "Pause stream replay" : "Replay the analyzed stream");
+}
+
+function startChartReplay() {
+  if (!state.rows.length) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    state.chartPlayback.progress = 1;
+    state.chartPlayback.playing = false;
+    drawChart(state.rows);
+    return;
+  }
+  if (state.chartPlayback.progress >= 1) state.chartPlayback.progress = 0;
+  state.chartPlayback.playing = true;
+  state.chartPlayback.lastTime = null;
+  updateChartPlayButton();
+  state.chartPlayback.frameId = requestAnimationFrame(animateChartReplay);
+}
+
+function animateChartReplay(timestamp) {
+  if (!state.chartPlayback.playing) return;
+  if (state.chartPlayback.lastTime === null) state.chartPlayback.lastTime = timestamp;
+  else {
+    state.chartPlayback.progress = Math.min(1, state.chartPlayback.progress + (timestamp - state.chartPlayback.lastTime) / 6500);
+    state.chartPlayback.lastTime = timestamp;
+  }
+  drawChart(state.rows);
+  if (state.chartPlayback.progress >= 1) {
+    state.chartPlayback.playing = false;
+    state.chartPlayback.frameId = null;
+    updateChartPlayButton();
+    return;
+  }
+  state.chartPlayback.frameId = requestAnimationFrame(animateChartReplay);
+}
+
+function toggleChartReplay() {
+  if (!state.rows.length) return;
+  if (state.chartPlayback.playing) {
+    state.chartPlayback.playing = false;
+    if (state.chartPlayback.frameId !== null) cancelAnimationFrame(state.chartPlayback.frameId);
+    state.chartPlayback.frameId = null;
+    drawChart(state.rows);
+    return;
+  }
+  if (state.chartPlayback.progress >= 1) state.chartPlayback.progress = 0;
+  startChartReplay();
 }
 
 function showChartTooltip(event) {
@@ -1092,6 +1292,7 @@ async function runAnalysis() {
 }
 
 $("detector").addEventListener("change", updateModelControls);
+$("chartPlayButton").addEventListener("click", toggleChartReplay);
 $("chart").setAttribute("aria-label", "Observed time-series values and predicted anomalies");
 $("chart").addEventListener("click", event => {
   if (!state.chartGeometry) return;
